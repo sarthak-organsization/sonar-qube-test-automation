@@ -1,43 +1,66 @@
-name: Build
+name: CI with SonarQube
 
 on:
   push:
     branches:
-      - main
+      - '**'  # Run on all branches
   pull_request:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: read  # Required for SonarCloud analysis
+  contents: read  # Required for SonarQube analysis
 
 jobs:
   build:
-    name: Build and Analyze
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Required for accurate SonarCloud analysis
+      - name: Clone Repository
+        run: |
+          echo "Cloning repository..."
+          git clone https://github.com/${{ github.repository }} repo
+          cd repo
+          ls -la  # Verify files exist
 
-      - name: Set up JDK (if using Java)
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'  # Adjust based on project needs
+      - name: Dummy Build Process
+        run: |
+          cd repo
+          echo "Running build..."
+          sleep 3
+          echo "✅ Build Completed!"
 
-      - name: Build Project (Example for Maven)
-        run: mvn clean verify
+  sonar-scan:
+    needs: build  # Runs after the build job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        run: |
+          echo "Cloning repository..."
+          git clone https://github.com/${{ github.repository }} repo
+          cd repo
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io  # Replacing with SonarCloud URL
+      - name: Install Java
+        run: |
+          echo "Installing Java..."
+          sudo apt update
+          sudo apt install -y openjdk-17-jdk
+          java -version
 
-      - name: SonarQube Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Install SonarScanner
+        run: |
+          echo "Installing SonarScanner..."
+          curl -fsSL https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip -o sonar-scanner.zip
+          unzip sonar-scanner.zip
+          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+          echo "export PATH=\$PATH:/opt/sonar-scanner/bin" >> ~/.bashrc
+          source ~/.bashrc
+          /opt/sonar-scanner/bin/sonar-scanner -v  # Verify installation
+
+      - name: Run SonarQube Scan
+        run: |
+          cd repo
+          /opt/sonar-scanner/bin/sonar-scanner \
+            -Dsonar.projectKey=sarthaksharma22_sonarqube-dummy-checks \
+            -Dsonar.organization=sarthak22 \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
