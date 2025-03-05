@@ -1,6 +1,7 @@
 name: CI with SonarQube
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - '**'  # Run on all branches
