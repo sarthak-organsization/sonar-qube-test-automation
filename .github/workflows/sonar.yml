@@ -12,7 +12,9 @@ permissions:
 
 jobs:
   build:
+    name: Build and Analyze
     runs-on: ubuntu-latest
+    
     steps:
       - name: Clone Repository
         run: |
@@ -29,14 +31,21 @@ jobs:
           echo "✅ Build Completed!"
 
   sonar-scan:
-    needs: build  # Runs after the build job
+    name: SonarQube Analysis
+    needs: build
     runs-on: ubuntu-latest
+    
     steps:
       - name: Clone Repository
         run: |
           echo "Cloning repository..."
           git clone https://github.com/${{ github.repository }} repo
           cd repo
+
+      - name: Check SonarQube Connectivity
+        run: |
+          echo "Checking connectivity to SonarQube..."
+          curl -v ${{ secrets.SONAR_HOST_URL }}
 
       - name: Install Java
         run: |
@@ -59,8 +68,10 @@ jobs:
         run: |
           cd repo
           /opt/sonar-scanner/bin/sonar-scanner \
-            -Dsonar.projectKey=sarthaksharma22_sonarqube-dummy-checks \
+            -Dsonar.projectKey=sarthak-organsization_sonar-qube-test-automation_5ffaabba-cf2f-42de-9bbc-90199431d950 \
             -Dsonar.organization=sarthak22 \
             -Dsonar.sources=. \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.ws.timeout=60  # Increased timeout for stability
+
