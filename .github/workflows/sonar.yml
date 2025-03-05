@@ -42,6 +42,10 @@ jobs:
           git clone https://github.com/${{ github.repository }} repo
           cd repo
 
+      - name: get runner ip address
+        id: ip
+        uses: haythem/public-ip@v1.2
+
       - name: Check SonarQube Connectivity
         run: |
           echo "Checking connectivity to SonarQube..."
