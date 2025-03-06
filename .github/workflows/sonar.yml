@@ -79,4 +79,5 @@ jobs:
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.ws.timeout=60  # Increased timeout for stability
+            -Dsonar.qualitygate.wait=true  # Wait for the quality gate result
 
