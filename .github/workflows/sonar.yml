@@ -73,7 +73,7 @@ jobs:
         run: |
           cd repo
           /opt/sonar-scanner/bin/sonar-scanner \
-            -Dsonar.projectKey=sarthak-organsization_sonar-qube-test-automation_5ffaabba-cf2f-42de-9bbc-90199431d950 \
+            -Dsonar.projectKey=sarthak-organsization_sonar-qube-test-automation_5ffaabba-cf2f-42de-9bbc-90199431d950
             -Dsonar.organization=sarthak22 \
             -Dsonar.sources=. \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
